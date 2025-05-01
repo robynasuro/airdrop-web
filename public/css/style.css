@@ -703,3 +703,126 @@ body.dark-mode .close {
     font-size: 0.9rem;
   }
 }
+
+/* Styling untuk Global Chat */
+.chat-container {
+  max-width: 900px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  margin: 20px auto;
+  flex: 1;
+}
+
+body.dark-mode .chat-container {
+  background: rgba(44, 62, 80, 0.95);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.chat-box {
+  border: 1px solid #ddd;
+  padding: 10px;
+  height: 400px;
+  overflow-y: scroll;
+  background-color: #fafafa;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+body.dark-mode .chat-box {
+  background-color: #333;
+  border-color: #555;
+}
+
+.chat-box p {
+  margin: 5px 0;
+  padding: 5px;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+  color: #333;
+}
+
+body.dark-mode .chat-box p {
+  background-color: #444;
+  color: #ddd;
+}
+
+.chat-input-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.chat-input-group input {
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  transition: border-color 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+body.dark-mode .chat-input-group input {
+  border: 1px solid #555;
+  background: #2c3e50;
+  color: #ecf0f1;
+}
+
+.chat-input-group input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+.chat-input-group input#username {
+  width: 150px;
+}
+
+.chat-input-group input#message {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Responsive styling untuk chat */
+@media (max-width: 768px) {
+  .chat-container {
+      padding: 15px;
+      margin: 10px;
+      width: calc(100% - 20px);
+      box-sizing: border-box;
+  }
+
+  .chat-box {
+      height: 300px;
+  }
+
+  .chat-input-group {
+      flex-direction: column;
+      gap: 10px;
+  }
+
+  .chat-input-group input#username,
+  .chat-input-group input#message {
+      width: 100%;
+      box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-container {
+      padding: 10px;
+      margin: 5px;
+      width: calc(100% - 10px);
+  }
+
+  .chat-box {
+      height: 250px;
+  }
+
+  .chat-input-group input {
+      font-size: 0.9rem;
+      padding: 10px;
+  }
+}
