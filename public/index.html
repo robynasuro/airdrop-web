@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airdrop List</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">0xcreamy</div>
+    <button class="hamburger" onclick="toggleMenu()">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="navbar-links">
+      <a href="index.html" class="active">Airdrop List</a>
+      <a href="#" onclick="showLoginModal()">Admin Dashboard</a>
+      <button id="darkModeToggle" class="dark-mode-btn">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Airdrop List</h1>
+    <div id="airdropList"></div>
+  </div>
+
+  <!-- Modal Login -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeLoginModal()">×</span>
+      <h2>Admin Login</h2>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <label for="modalPassword">Admin Password:</label>
+        <input type="password" id="modalPassword" name="password" required>
+        <button type="submit">Login</button>
+      </form>
+      <p id="loginMessage"></p>
+    </div>
+  </div>
+
+  <!-- Modal Airdrop Detail -->
+  <div id="airdropModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAirdropModal()">×</span>
+      <div id="airdropModalContent"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 0xcreamy. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="https://x.com/0xCreamy" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-x-twitter"></i>
+      </a>
+      <a href="https://github.com/robynasuro" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+  </footer>
+
+  <script>
+  fetch("/api/airdrop")
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("airdropList");
+      data.forEach(airdrop => {
+        const dotClass = airdrop.status === "active" ? "dot-green" : "dot-red";
+        const statusText = airdrop.status === "active" ? "Active" : "Ended";
+        const div = document.createElement("div");
+        div.className = "airdrop-item";
+        div.innerHTML = `
+          ${airdrop.image ? `<img src="${airdrop.image}" alt="${airdrop.title}" class="airdrop-image">` : ""}
+          <h3>${airdrop.title} <span class="${dotClass}"></span> <span class="status-text">${statusText}</span></h3>
+          <p class="description">${airdrop.description}</p>
+          <p><strong>Tier:</strong> ${airdrop.tier}</p>
+          ${airdrop.label ? `<p><strong>Label:</strong> ${airdrop.label}</p>` : ""}
+          <p><strong>Created:</strong> ${new Date(airdrop.createdAt).toLocaleString()}</p>
+        `;
+        div.addEventListener("click", () => showAirdropModal(airdrop));
+        list.appendChild(div);
+      });
+    })
+    .catch(err => console.error("Error fetching airdrops:", err));
+
+  function parseLinks(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`);
+  }
+
+  function formatDescription(description) {
+    const withBreaks = description.replace(/\n/g, "<br>");
+    const withLinks = parseLinks(withBreaks);
+    return withLinks;
+  }
+
+  function showLoginModal() {
+    document.getElementById("loginModal").classList.add("active");
+  }
+
+  function closeLoginModal() {
+    document.getElementById("loginModal").classList.remove("active");
+    document.getElementById("loginForm").reset();
+    document.getElementById("loginMessage").textContent = "";
+  }
+
+  async function handleLogin(event) {
+    event.preventDefault();
+    const password = document.getElementById("modalPassword").value;
+    const messageDiv = document.getElementById("loginMessage");
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        window.location.href = "/admin.html";
+      } else {
+        messageDiv.textContent = data.error || "Login failed";
+        messageDiv.style.color = "red";
+      }
+    } catch (err) {
+      messageDiv.textContent = "Error during login";
+      messageDiv.style.color = "red";
+    }
+  }
+
+  function showAirdropModal(airdrop) {
+    const modalContent = document.getElementById("airdropModalContent");
+    const dotClass = airdrop.status === "active" ? "dot-green" : "dot-red";
+    const statusText = airdrop.status === "active" ? "Active" : "Ended";
+    const formattedDescription = formatDescription(airdrop.description);
+    modalContent.innerHTML = `
+      ${airdrop.image ? `<img src="${airdrop.image}" alt="${airdrop.title}" class="airdrop-image">` : ""}
+      <h3>${airdrop.title} <span class="${dotClass}"></span> <span class="status-text">${statusText}</span></h3>
+      <p class="description full-description">${formattedDescription}</p>
+      <p><strong>Tier:</strong> ${airdrop.tier}</p>
+      ${airdrop.label ? `<p><strong>Label:</strong> ${airdrop.label}</p>` : ""}
+      <p><strong>Created:</strong> ${new Date(airdrop.createdAt).toLocaleString()}</p>
+    `;
+    document.getElementById("airdropModal").classList.add("active");
+  }
+
+  function closeAirdropModal() {
+    document.getElementById("airdropModal").classList.remove("active");
+  }
+
+  function toggleMenu() {
+    const navbarLinks = document.querySelector(".navbar-links");
+    navbarLinks.classList.toggle("active");
+  }
+
+  // Dark Mode Toggle
+  const darkModeToggle = document.getElementById("darkModeToggle");
+  darkModeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+    const icon = darkModeToggle.querySelector("i");
+    if (document.body.classList.contains("dark-mode")) {
+      icon.classList.remove("fa-moon");
+      icon.classList.add("fa-sun");
+      localStorage.setItem("theme", "dark");
+    } else {
+      icon.classList.remove("fa-sun");
+      icon.classList.add("fa-moon");
+      localStorage.setItem("theme", "light");
+    }
+  });
+
+  // Load saved theme
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+    darkModeToggle.querySelector("i").classList.remove("fa-moon");
+    darkModeToggle.querySelector("i").classList.add("fa-sun");
+  }
+  </script>
+</body>
+</html>
