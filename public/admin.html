@@ -6,18 +6,19 @@
   <title>Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <!-- Navbar -->
   <nav class="navbar">
     <div class="navbar-brand">0xcreamy</div>
-    <button class="hamburger" id="hamburger">
+    <button class="hamburger" onclick="toggleMenu()">
       <i class="fas fa-bars"></i>
     </button>
-    <div class="navbar-links" id="navbarLinks">
-      <a href="index.html">Airdrop List</a>
-      <a href="admin.html" class="active">Admin Dashboard</a>
+    <div class="navbar-links">
+      <a href="/index">Airdrop List</a>
+      <a href="/chat">Global Chat</a>
+      <a href="/admin" class="active">Admin Dashboard</a>
       <button id="darkModeToggle" class="dark-mode-btn">
         <i class="fas fa-moon"></i>
       </button>
@@ -221,7 +222,7 @@
           signal: AbortSignal.timeout(10000),
         });
         if (res.ok) {
-          window.location.href = "/index.html";
+          window.location.href = "/index"; // Diupdate tanpa .html
         } else {
           alert("Failed to logout");
         }
@@ -231,11 +232,49 @@
       }
     }
 
+    // Toggle menu untuk navbar responsif
+    function toggleMenu() {
+      const navbarLinks = document.querySelector(".navbar-links");
+      const hamburgerIcon = document.querySelector(".hamburger i");
+      navbarLinks.classList.toggle("active");
+      if (navbarLinks.classList.contains("active")) {
+        hamburgerIcon.classList.remove("fa-bars");
+        hamburgerIcon.classList.add("fa-times");
+      } else {
+        hamburgerIcon.classList.remove("fa-times");
+        hamburgerIcon.classList.add("fa-bars");
+      }
+    }
+
+    // Tambah event listener untuk nutup menu pas klik link
+    document.addEventListener("DOMContentLoaded", () => {
+      const navbarLinks = document.querySelector(".navbar-links");
+      const links = navbarLinks.querySelectorAll("a");
+
+      links.forEach(link => {
+        link.addEventListener("click", () => {
+          navbarLinks.classList.remove("active");
+          const hamburgerIcon = document.querySelector(".hamburger i");
+          hamburgerIcon.classList.remove("fa-times");
+          hamburgerIcon.classList.add("fa-bars");
+        });
+      });
+
+      // Nutup menu pas klik di luar navbar
+      document.addEventListener("click", (e) => {
+        const hamburger = document.querySelector(".hamburger");
+        if (!navbarLinks.contains(e.target) && !hamburger.contains(e.target) && navbarLinks.classList.contains("active")) {
+          navbarLinks.classList.remove("active");
+          const hamburgerIcon = document.querySelector(".hamburger i");
+          hamburgerIcon.classList.remove("fa-times");
+          hamburgerIcon.classList.add("fa-bars");
+        }
+      });
+    });
+
     // Dark Mode Toggle
     const darkModeToggle = document.getElementById("darkModeToggle");
-    darkModeToggle.addEventListener("click", toggleDarkMode);
-
-    function toggleDarkMode() {
+    darkModeToggle.addEventListener("click", () => {
       document.body.classList.toggle("dark-mode");
       const icon = darkModeToggle.querySelector("i");
       if (document.body.classList.contains("dark-mode")) {
@@ -247,30 +286,14 @@
         icon.classList.add("fa-moon");
         localStorage.setItem("theme", "light");
       }
-    }
+    });
 
     // Load saved theme
     if (localStorage.getItem("theme") === "dark") {
       document.body.classList.add("dark-mode");
-      const icon = darkModeToggle.querySelector("i");
-      icon.classList.remove("fa-moon");
-      icon.classList.add("fa-sun");
+      darkModeToggle.querySelector("i").classList.remove("fa-moon");
+      darkModeToggle.querySelector("i").classList.add("fa-sun");
     }
-
-    // Hamburger Menu Toggle
-    const hamburger = document.getElementById("hamburger");
-    const navbarLinks = document.getElementById("navbarLinks");
-    hamburger.addEventListener("click", () => {
-      navbarLinks.classList.toggle("active");
-      const icon = hamburger.querySelector("i");
-      if (navbarLinks.classList.contains("active")) {
-        icon.classList.remove("fa-bars");
-        icon.classList.add("fa-times");
-      } else {
-        icon.classList.remove("fa-times");
-        icon.classList.add("fa-bars");
-      }
-    });
   </script>
 </body>
 </html>

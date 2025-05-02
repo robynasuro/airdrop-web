@@ -44,6 +44,7 @@ body.dark-mode .navbar-brand {
   display: flex;
   align-items: center;
   gap: 20px;
+  transition: all 0.3s ease; /* Tambah transisi biar smooth */
 }
 
 .navbar-links a {
@@ -95,12 +96,24 @@ body.dark-mode .dark-mode-btn {
   border: none;
   color: #555;
   cursor: pointer;
+  transition: transform 0.3s ease; /* Tambah animasi rotasi */
+}
+
+.hamburger i {
+  transition: transform 0.3s ease; /* Animasi untuk icon */
+}
+
+.hamburger.active i.fa-times {
+  transform: rotate(90deg); /* Rotasi pas jadi X */
 }
 
 body.dark-mode .hamburger {
   color: #bdc3c7;
 }
 
+.hamburger:hover {
+  transform: scale(1.1); /* Efek hover */
+}
 .container {
   max-width: 900px;
   width: 100%;
@@ -242,7 +255,6 @@ body.dark-mode .dot-red {
 body.dark-mode .status-text {
   color: #bdc3c7;
 }
-
 .admin-section {
   margin-bottom: 40px;
 }
@@ -366,7 +378,6 @@ p#uploadMessage[style*="color: red"],
 p#loginMessage[style*="color: red"] {
   color: #e74c3c !important;
 }
-
 .footer {
   display: flex;
   justify-content: space-between;
@@ -517,7 +528,6 @@ body.dark-mode .close {
   50% { opacity: 0.3; }
   100% { opacity: 1; }
 }
-
 /* Media Queries untuk Responsive */
 @media (max-width: 768px) {
   /* Navbar di mobile */
@@ -703,7 +713,6 @@ body.dark-mode .close {
     font-size: 0.9rem;
   }
 }
-
 /* Styling untuk Global Chat */
 .chat-container {
   max-width: 900px;
