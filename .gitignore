@@ -4,3 +4,4 @@ airdrop.db
 public/uploads/
 npm-debug.log yarn-error.log
 .DS_Store Thumbs.db
+test.js

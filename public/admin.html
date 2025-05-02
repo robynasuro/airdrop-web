@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
@@ -16,9 +16,9 @@
       <i class="fas fa-bars"></i>
     </button>
     <div class="navbar-links">
-      <a href="/index">Airdrop List</a>
-      <a href="/chat">Global Chat</a>
-      <a href="/admin" class="active">Admin Dashboard</a>
+      <a href="/index.html">Airdrop List</a>
+      <a href="/chat.html">Global Chat</a>
+      <a href="/admin.html" class="active">Login</a>
       <button id="darkModeToggle" class="dark-mode-btn">
         <i class="fas fa-moon"></i>
       </button>
@@ -27,7 +27,7 @@
   </nav>
 
   <div class="container">
-    <h1>Admin Dashboard</h1>
+    <h1>Login</h1>
     <div class="admin-section">
       <h2>Upload Airdrop</h2>
       <form id="uploadForm">
@@ -87,15 +87,17 @@
         data.forEach(airdrop => {
           const dotClass = airdrop.status === "active" ? "dot-green" : "dot-red";
           const statusText = airdrop.status === "active" ? "Active" : "Ended";
+          const updatedMark = airdrop.lastUpdated ? '<span class="updated-mark">Updated</span>' : '';
           const div = document.createElement("div");
           div.className = "airdrop-item";
           div.innerHTML = `
             ${airdrop.image ? `<img src="${airdrop.image}" alt="${airdrop.title}" class="airdrop-image">` : ""}
-            <h3>${airdrop.title} <span class="${dotClass}"></span> <span class="status-text">${statusText}</span></h3>
+            <h3>${airdrop.title} <span class="${dotClass}"></span> <span class="status-text">${statusText}</span> ${updatedMark}</h3>
             <p class="description">${airdrop.description}</p>
             <p><strong>Tier:</strong> ${airdrop.tier}</p>
             ${airdrop.label ? `<p><strong>Label:</strong> ${airdrop.label}</p>` : ""}
             <p><strong>Created:</strong> ${new Date(airdrop.createdAt).toLocaleString()}</p>
+            ${airdrop.lastUpdated ? `<p><strong>Last Updated:</strong> ${new Date(airdrop.lastUpdated).toLocaleString()}</p>` : ""}
             <button class="toggle-status-btn" onclick="toggleStatus('${airdrop._id}', '${airdrop.status}')">
               ${airdrop.status === "active" ? "End" : "Activate"}
             </button>
@@ -154,7 +156,7 @@
 
     // Toggle status airdrop
     async function toggleStatus(id, currentStatus) {
-      const newStatus = currentStatus === "active" ? "inactive" : "active";
+      const newStatus = currentStatus === "active" ? "ended" : "active";
       try {
         const res = await fetch(`/api/airdrop/${id}/status`, {
           method: "PATCH",
@@ -162,11 +164,11 @@
           body: JSON.stringify({ status: newStatus }),
           signal: AbortSignal.timeout(10000),
         });
-        if (res.ok) {
-          window.location.reload();
-        } else {
-          alert("Failed to toggle status");
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to toggle status");
         }
+        window.location.reload();
       } catch (err) {
         console.error("Error toggling status:", err);
         alert("Error toggling status: " + err.message);
@@ -205,7 +207,8 @@
         if (res.ok) {
           window.location.reload();
         } else {
-          alert("Failed to delete airdrop");
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to delete airdrop");
         }
       } catch (err) {
         console.error("Error deleting airdrop:", err);
@@ -222,9 +225,10 @@
           signal: AbortSignal.timeout(10000),
         });
         if (res.ok) {
-          window.location.href = "/index"; // Diupdate tanpa .html
+          window.location.href = "/index.html";
         } else {
-          alert("Failed to logout");
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Failed to logout");
         }
       } catch (err) {
         console.error("Error logging out:", err);

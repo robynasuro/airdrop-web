@@ -5,9 +5,6 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Pastikan middleware parsing body ada sebelum multer
-router.use(express.urlencoded({ extended: true }));
-
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "defaultpassword";
 
 // Setup multer untuk upload file
@@ -52,6 +49,7 @@ router.post("/upload", upload.single("image"), (req, res) => {
     label: label || "",
     status: "active",
     createdAt: new Date().toISOString(),
+    lastUpdated: null,
     image: req.file ? `/uploads/${req.file.filename}` : null,
   };
   db.insert(airdrop, (err, newDoc) => {
@@ -62,9 +60,20 @@ router.post("/upload", upload.single("image"), (req, res) => {
   });
 });
 
-// Get all airdrops
+// Get all airdrops with filter
 router.get("/", (req, res) => {
-  db.find({}).sort({ createdAt: -1 }).exec((err, docs) => {
+  const filter = req.query.filter || "all";
+  let query = {};
+
+  if (filter === "active") {
+    query = { status: "active" };
+  } else if (filter === "ended") {
+    query = { status: "ended" };
+  } else if (filter === "updated") {
+    query = { lastUpdated: { $exists: true, $ne: null } };
+  }
+
+  db.find(query).sort({ createdAt: -1 }).exec((err, docs) => {
     if (err) {
       return res.status(500).json({ error: "Failed to fetch airdrops" });
     }
@@ -75,7 +84,7 @@ router.get("/", (req, res) => {
 // Update airdrop
 router.put("/:id", upload.single("image"), (req, res) => {
   const { id } = req.params;
-  const { password, title, description, tier, label } = req.body;
+  const { password, title, description, tier, label, status } = req.body;
   if (password !== ADMIN_PASSWORD) {
     return res.status(401).json({ error: "Unauthorized" });
   }
@@ -83,7 +92,6 @@ router.put("/:id", upload.single("image"), (req, res) => {
     return res.status(400).json({ error: "Title, description, and tier are required" });
   }
 
-  // Cari airdrop yang akan diupdate
   db.findOne({ _id: id }, (err, doc) => {
     if (err) {
       return res.status(500).json({ error: "Failed to update airdrop" });
@@ -92,7 +100,6 @@ router.put("/:id", upload.single("image"), (req, res) => {
       return res.status(404).json({ error: "Airdrop not found" });
     }
 
-    // Hapus gambar lama jika ada gambar baru
     if (req.file && doc.image) {
       const oldImageName = doc.image.replace("/uploads/", "");
       const oldImagePath = path.join(__dirname, "../../public/uploads", oldImageName);
@@ -105,14 +112,14 @@ router.put("/:id", upload.single("image"), (req, res) => {
       }
     }
 
-    // Update data airdrop
     const updatedAirdrop = {
       title,
       description,
       tier,
       label: label || "",
-      status: doc.status,
+      status: status || doc.status,
       createdAt: doc.createdAt,
+      lastUpdated: new Date().toISOString(),
       image: req.file ? `/uploads/${req.file.filename}` : doc.image,
     };
 
@@ -132,10 +139,10 @@ router.put("/:id", upload.single("image"), (req, res) => {
 router.patch("/:id/status", (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  if (!status || !["active", "inactive"].includes(status)) {
+  if (!status || !["active", "ended"].includes(status)) {
     return res.status(400).json({ error: "Invalid status" });
   }
-  db.update({ _id: id }, { $set: { status } }, {}, (err, numAffected) => {
+  db.update({ _id: id }, { $set: { status, lastUpdated: new Date().toISOString() } }, {}, (err, numAffected) => {
     if (err) {
       return res.status(500).json({ error: "Failed to update status" });
     }
@@ -146,7 +153,7 @@ router.patch("/:id/status", (req, res) => {
   });
 });
 
-// Delete airdrop (sekarang hapus gambar juga)
+// Delete airdrop
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
   db.findOne({ _id: id }, (err, doc) => {
@@ -163,7 +170,6 @@ router.delete("/:id", (req, res) => {
       if (numRemoved === 0) {
         return res.status(404).json({ error: "Airdrop not found" });
       }
-      // Hapus file gambar kalau ada
       if (doc.image) {
         const imageName = doc.image.replace("/uploads/", "");
         const imagePath = path.join(__dirname, "../../public/uploads", imageName);
@@ -180,7 +186,7 @@ router.delete("/:id", (req, res) => {
   });
 });
 
-// Tambah endpoint logout
+// Logout
 router.post("/logout", (req, res) => {
   try {
     res.status(200).json({ success: true, message: "Logged out successfully" });
@@ -188,3 +194,6 @@ router.post("/logout", (req, res) => {
     res.status(500).json({ error: "Failed to logout" });
   }
 });
+
+console.log('Exporting router from airdrop.js:', router);
+module.exports = router;

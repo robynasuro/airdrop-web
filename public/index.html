@@ -16,9 +16,9 @@
       <i class="fas fa-bars"></i>
     </button>
     <div class="navbar-links">
-      <a href="/index" class="active">Airdrop List</a>
-      <a href="/chat">Global Chat</a>
-      <a href="#" onclick="showLoginModal()">Admin Dashboard</a>
+      <a href="/index.html" class="active">Airdrop List</a>
+      <a href="/chat.html">Global Chat</a>
+      <a href="#" onclick="showLoginModal()">Login</a>
       <button id="darkModeToggle" class="dark-mode-btn">
         <i class="fas fa-moon"></i>
       </button>
@@ -27,14 +27,26 @@
 
   <div class="container">
     <h1>Airdrop List</h1>
+    <!-- Search Input -->
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Search by label or title (e.g., Testnet, Miden Testnet)" oninput="searchAirdrops()">
+      <i class="fas fa-search search-icon"></i>
+    </div>
+    <div id="tab-container">
+      <button class="tab active" onclick="filterAirdrops('all')">All</button>
+      <button class="tab" onclick="filterAirdrops('active')">Active</button>
+      <button class="tab" onclick="filterAirdrops('ended')">Ended</button>
+      <button class="tab" onclick="filterAirdrops('updated')">Updated</button>
+    </div>
     <div id="airdropList"></div>
+    <p id="noResults" style="display: none; text-align: center; color: #e74c3c; margin-top: 20px;"></p>
   </div>
 
   <!-- Modal Login -->
   <div id="loginModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeLoginModal()">×</span>
-      <h2>Admin Login</h2>
+      <h2>Login</h2>
       <form id="loginForm" onsubmit="handleLogin(event)">
         <label for="modalPassword">Admin Password:</label>
         <input type="password" id="modalPassword" name="password" required>
@@ -66,28 +78,112 @@
   </footer>
 
   <script>
-  fetch("/api/airdrop")
-    .then(res => res.json())
-    .then(data => {
-      const list = document.getElementById("airdropList");
-      data.forEach(airdrop => {
-        const dotClass = airdrop.status === "active" ? "dot-green" : "dot-red";
-        const statusText = airdrop.status === "active" ? "Active" : "Ended";
-        const div = document.createElement("div");
-        div.className = "airdrop-item";
-        div.innerHTML = `
-          ${airdrop.image ? `<img src="${airdrop.image}" alt="${airdrop.title}" class="airdrop-image">` : ""}
-          <h3>${airdrop.title} <span class="${dotClass}"></span> <span class="status-text">${statusText}</span></h3>
-          <p class="description">${airdrop.description}</p>
-          <p><strong>Tier:</strong> ${airdrop.tier}</p>
-          ${airdrop.label ? `<p><strong>Label:</strong> ${airdrop.label}</p>` : ""}
-          <p><strong>Created:</strong> ${new Date(airdrop.createdAt).toLocaleString()}</p>
-        `;
-        div.addEventListener("click", () => showAirdropModal(airdrop));
-        list.appendChild(div);
-      });
-    })
-    .catch(err => console.error("Error fetching airdrops:", err));
+  let airdrops = [];
+  let currentFilter = 'all';
+
+  // Fetch data sekali dan simpan
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/airdrop")
+      .then(res => res.json())
+      .then(data => {
+        airdrops = data;
+        renderAirdrops();
+      })
+      .catch(err => console.error("Error fetching airdrops:", err));
+  });
+
+  function filterAirdrops(filter) {
+    currentFilter = filter;
+    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+    document.querySelector(`.tab[onclick="filterAirdrops('${filter}')"]`).classList.add("active");
+
+    let filteredAirdrops = [...airdrops];
+    if (filter === "active") {
+      filteredAirdrops = airdrops.filter(a => a.status === "active");
+    } else if (filter === "ended") {
+      filteredAirdrops = airdrops.filter(a => a.status === "ended");
+    } else if (filter === "updated") {
+      filteredAirdrops = airdrops.filter(a => a.lastUpdated);
+    }
+
+    const searchQuery = document.getElementById("searchInput").value.trim();
+    if (searchQuery) {
+      filteredAirdrops = searchAirdropsLogic(filteredAirdrops, searchQuery);
+    }
+
+    renderAirdrops(filteredAirdrops);
+  }
+
+  function searchAirdrops() {
+    const query = document.getElementById("searchInput").value.trim().toLowerCase();
+    let filteredAirdrops = [...airdrops];
+
+    if (currentFilter === "active") {
+      filteredAirdrops = filteredAirdrops.filter(a => a.status === "active");
+    } else if (currentFilter === "ended") {
+      filteredAirdrops = filteredAirdrops.filter(a => a.status === "ended");
+    } else if (currentFilter === "updated") {
+      filteredAirdrops = filteredAirdrops.filter(a => a.lastUpdated);
+    }
+
+    filteredAirdrops = searchAirdropsLogic(filteredAirdrops, query);
+    renderAirdrops(filteredAirdrops);
+  }
+
+  function searchAirdropsLogic(data, query) {
+    if (!query) return data;
+
+    const lowerQuery = query.toLowerCase();
+    let exactMatch = null;
+
+    exactMatch = data.find(airdrop => 
+      airdrop.title.toLowerCase() === lowerQuery ||
+      (airdrop.label && airdrop.label.toLowerCase() === lowerQuery)
+    );
+
+    if (exactMatch) {
+      return [exactMatch];
+    } else {
+      return data.filter(airdrop => 
+        (airdrop.label && airdrop.label.toLowerCase().includes(lowerQuery)) ||
+        airdrop.title.toLowerCase().includes(lowerQuery)
+      );
+    }
+  }
+
+  function renderAirdrops(data = airdrops) {
+    const list = document.getElementById("airdropList");
+    const noResults = document.getElementById("noResults");
+    list.innerHTML = ""; // Bersihkan DOM sebelum render
+    noResults.style.display = "none";
+
+    if (data.length === 0) {
+      noResults.textContent = currentFilter === "ended" ? "No airdrop found ended" : "No airdrops found matching your search.";
+      noResults.style.display = "block";
+      return;
+    }
+
+    const fragment = document.createDocumentFragment(); // Gunakan fragment untuk render lebih cepat
+    data.forEach(airdrop => {
+      const div = document.createElement("div");
+      div.className = "airdrop-item";
+      const dotClass = airdrop.status === "active" ? "dot-green" : "dot-red";
+      const statusText = airdrop.status === "active" ? "Active" : "Ended";
+      const updatedMark = airdrop.lastUpdated ? '<span class="updated-mark">Updated</span>' : '';
+      div.innerHTML = `
+        ${airdrop.image ? `<img src="${airdrop.image}" alt="${airdrop.title}" class="airdrop-image" loading="lazy">` : ""}
+        <h3>${airdrop.title} <span class="${dotClass}"></span> <span class="status-text">${statusText}</span> ${updatedMark}</h3>
+        <p class="description">${airdrop.description}</p>
+        <p><strong>Tier:</strong> ${airdrop.tier}</p>
+        ${airdrop.label ? `<p><strong>Label:</strong> ${airdrop.label}</p>` : ""}
+        <p><strong>Created:</strong> ${new Date(airdrop.createdAt).toLocaleString()}</p>
+        ${airdrop.lastUpdated ? `<p><strong>Last Updated:</strong> ${new Date(airdrop.lastUpdated).toLocaleString()}</p>` : ""}
+      `;
+      div.addEventListener("click", () => showAirdropModal(airdrop));
+      fragment.appendChild(div);
+    });
+    list.appendChild(fragment); // Tambah ke DOM sekali saja
+  }
 
   function parseLinks(text) {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -123,7 +219,7 @@
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        window.location.href = "/admin";
+        window.location.href = "/admin.html";
       } else {
         messageDiv.textContent = data.error || "Login failed";
         messageDiv.style.color = "red";
@@ -138,14 +234,16 @@
     const modalContent = document.getElementById("airdropModalContent");
     const dotClass = airdrop.status === "active" ? "dot-green" : "dot-red";
     const statusText = airdrop.status === "active" ? "Active" : "Ended";
+    const updatedMark = airdrop.lastUpdated ? '<span class="updated-mark">Updated</span>' : '';
     const formattedDescription = formatDescription(airdrop.description);
     modalContent.innerHTML = `
-      ${airdrop.image ? `<img src="${airdrop.image}" alt="${airdrop.title}" class="airdrop-image">` : ""}
-      <h3>${airdrop.title} <span class="${dotClass}"></span> <span class="status-text">${statusText}</span></h3>
+      ${airdrop.image ? `<img src="${airdrop.image}" alt="${airdrop.title}" class="airdrop-image" loading="lazy">` : ""}
+      <h3>${airdrop.title} <span class="${dotClass}"></span> <span class="status-text">${statusText}</span> ${updatedMark}</h3>
       <p class="description full-description">${formattedDescription}</p>
       <p><strong>Tier:</strong> ${airdrop.tier}</p>
       ${airdrop.label ? `<p><strong>Label:</strong> ${airdrop.label}</p>` : ""}
       <p><strong>Created:</strong> ${new Date(airdrop.createdAt).toLocaleString()}</p>
+      ${airdrop.lastUpdated ? `<p><strong>Last Updated:</strong> ${new Date(airdrop.lastUpdated).toLocaleString()}</p>` : ""}
     `;
     document.getElementById("airdropModal").classList.add("active");
   }
@@ -158,7 +256,6 @@
     const navbarLinks = document.querySelector(".navbar-links");
     const hamburgerIcon = document.querySelector(".hamburger i");
     navbarLinks.classList.toggle("active");
-    // Toggle icon antara fa-bars dan fa-times
     if (navbarLinks.classList.contains("active")) {
       hamburgerIcon.classList.remove("fa-bars");
       hamburgerIcon.classList.add("fa-times");
@@ -168,22 +265,18 @@
     }
   }
 
-  // Tambah event listener untuk nutup menu pas klik link
   document.addEventListener("DOMContentLoaded", () => {
     const navbarLinks = document.querySelector(".navbar-links");
     const links = navbarLinks.querySelectorAll("a");
-
     links.forEach(link => {
       link.addEventListener("click", () => {
         navbarLinks.classList.remove("active");
-        // Reset hamburger icon ke fa-bars
         const hamburgerIcon = document.querySelector(".hamburger i");
         hamburgerIcon.classList.remove("fa-times");
         hamburgerIcon.classList.add("fa-bars");
       });
     });
 
-    // Nutup menu pas klik di luar navbar
     document.addEventListener("click", (e) => {
       const hamburger = document.querySelector(".hamburger");
       if (!navbarLinks.contains(e.target) && !hamburger.contains(e.target) && navbarLinks.classList.contains("active")) {
@@ -193,9 +286,10 @@
         hamburgerIcon.classList.add("fa-bars");
       }
     });
+
+    filterAirdrops("all");
   });
 
-  // Dark Mode Toggle
   const darkModeToggle = document.getElementById("darkModeToggle");
   darkModeToggle.addEventListener("click", () => {
     document.body.classList.toggle("dark-mode");
@@ -211,7 +305,6 @@
     }
   });
 
-  // Load saved theme
   if (localStorage.getItem("theme") === "dark") {
     document.body.classList.add("dark-mode");
     darkModeToggle.querySelector("i").classList.remove("fa-moon");

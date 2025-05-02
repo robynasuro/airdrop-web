@@ -7,12 +7,17 @@ body {
   display: flex;
   flex-direction: column;
   transition: background 0.3s ease, color 0.3s ease;
-  overflow-x: hidden; /* Cegah horizontal scrolling */
+  overflow-x: hidden;
 }
 
 body.dark-mode {
   background: linear-gradient(135deg, #2c3e50, #34495e);
   color: #ddd;
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .navbar {
@@ -23,6 +28,8 @@ body.dark-mode {
   justify-content: space-between;
   align-items: center;
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 body.dark-mode .navbar {
@@ -44,7 +51,7 @@ body.dark-mode .navbar-brand {
   display: flex;
   align-items: center;
   gap: 20px;
-  transition: all 0.3s ease; /* Tambah transisi biar smooth */
+  transition: all 0.3s ease;
 }
 
 .navbar-links a {
@@ -77,18 +84,27 @@ body.dark-mode .navbar-links a:hover {
   color: #555;
   font-size: 1.2rem;
   cursor: pointer;
-  transition: color 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 body.dark-mode .dark-mode-btn {
   color: #ecf0f1;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .dark-mode-btn:hover {
-  color: #3498db;
+  background: #f0f0f0;
+  transform: rotate(360deg);
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
 }
 
-/* Hamburger menu untuk mobile */
+body.dark-mode .dark-mode-btn:hover {
+  background: #34495e;
+}
+
 .hamburger {
   display: none;
   font-size: 1.5rem;
@@ -96,15 +112,15 @@ body.dark-mode .dark-mode-btn {
   border: none;
   color: #555;
   cursor: pointer;
-  transition: transform 0.3s ease; /* Tambah animasi rotasi */
+  transition: transform 0.3s ease;
 }
 
 .hamburger i {
-  transition: transform 0.3s ease; /* Animasi untuk icon */
+  transition: transform 0.3s ease;
 }
 
 .hamburger.active i.fa-times {
-  transform: rotate(90deg); /* Rotasi pas jadi X */
+  transform: rotate(90deg);
 }
 
 body.dark-mode .hamburger {
@@ -112,8 +128,9 @@ body.dark-mode .hamburger {
 }
 
 .hamburger:hover {
-  transform: scale(1.1); /* Efek hover */
+  transform: scale(1.1);
 }
+
 .container {
   max-width: 900px;
   width: 100%;
@@ -123,6 +140,7 @@ body.dark-mode .hamburger {
   padding: 30px;
   margin: 20px auto;
   flex: 1;
+  box-sizing: border-box;
 }
 
 body.dark-mode .container {
@@ -156,19 +174,20 @@ body.dark-mode h3 {
 
 .airdrop-item {
   background: #f9f9f9;
+  border: 1px solid #e0e0e0;
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 15px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
 }
 
 body.dark-mode .airdrop-item {
   background: #34495e;
+  border: 1px solid #2c3e50;
+  border-radius: 10px;
 }
 
 .airdrop-item:hover {
-  transform: translateY(-5px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -230,7 +249,7 @@ body.dark-mode .full-description {
   border-radius: 50%;
   border: 2px solid #fff;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  animation: blink 1.5s infinite; /* Tambah animasi blinking */
+  animation: blink 1.5s infinite;
 }
 
 body.dark-mode .dot-green,
@@ -255,6 +274,113 @@ body.dark-mode .dot-red {
 body.dark-mode .status-text {
   color: #bdc3c7;
 }
+
+.updated-mark {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #3498db;
+  background: rgba(52, 152, 219, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 10px;
+}
+
+body.dark-mode .updated-mark {
+  color: #74b9ff;
+  background: rgba(52, 152, 219, 0.2);
+}
+
+#tab-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 20px;
+  background: #f0f0f0;
+  color: #555;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+}
+
+body.dark-mode .tab {
+  background: #2c3e50;
+  color: #bdc3c7;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.tab:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+body.dark-mode .tab:hover {
+  background: #34495e;
+}
+
+.tab.active {
+  background: #3498db;
+  color: white;
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+}
+
+body.dark-mode .tab.active {
+  background: #74b9ff;
+  box-shadow: 0 4px 10px rgba(116, 185, 255, 0.3);
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 20px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 10px 40px 10px 15px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-mode .search-container input {
+  background: #2c3e50;
+  border: 1px solid #555;
+  color: #ecf0f1;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+.search-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  font-size: 1rem;
+}
+
+body.dark-mode .search-icon {
+  color: #bdc3c7;
+}
+
 .admin-section {
   margin-bottom: 40px;
 }
@@ -378,6 +504,7 @@ p#uploadMessage[style*="color: red"],
 p#loginMessage[style*="color: red"] {
   color: #e74c3c !important;
 }
+
 .footer {
   display: flex;
   justify-content: space-between;
@@ -420,7 +547,6 @@ body.dark-mode .footer-links a {
   color: #3498db;
 }
 
-/* Modal styles */
 .modal {
   display: none;
   position: fixed;
@@ -501,12 +627,14 @@ body.dark-mode .modal-content a:hover {
 
 .close {
   position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 1.5rem;
+  top: 15px;
+  right: 20px;
+  font-size: 1.8rem;
   cursor: pointer;
   color: #555;
   transition: color 0.3s ease;
+  padding: 5px 10px;
+  border-radius: 50%;
 }
 
 body.dark-mode .close {
@@ -515,6 +643,11 @@ body.dark-mode .close {
 
 .close:hover {
   color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+}
+
+body.dark-mode .close:hover {
+  background: rgba(231, 76, 60, 0.2);
 }
 
 @keyframes slideIn {
@@ -522,15 +655,13 @@ body.dark-mode .close {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Animasi blinking untuk dot */
 @keyframes blink {
   0% { opacity: 1; }
   50% { opacity: 0.3; }
   100% { opacity: 1; }
 }
-/* Media Queries untuk Responsive */
+
 @media (max-width: 768px) {
-  /* Navbar di mobile */
   .navbar {
     padding: 10px 15px;
     flex-direction: row;
@@ -550,7 +681,7 @@ body.dark-mode .close {
     top: 50px;
     left: 0;
     width: 100%;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 250, 0.95);
     padding: 15px 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     z-index: 2000;
@@ -582,12 +713,21 @@ body.dark-mode .close {
     display: block;
   }
 
-  /* Container dan airdrop item */
   .container {
     padding: 15px;
     margin: 10px;
     width: calc(100% - 20px);
     box-sizing: border-box;
+  }
+
+  #tab-container {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tab {
+    padding: 8px 15px;
+    font-size: 0.9rem;
   }
 
   h1, h2 {
@@ -600,13 +740,22 @@ body.dark-mode .close {
 
   .airdrop-item {
     padding: 15px;
+    transition: none;
+  }
+
+  .airdrop-item:hover {
+    transform: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  body.dark-mode .airdrop-item:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   }
 
   .airdrop-image {
     max-width: 100%;
   }
 
-  /* Modal di mobile */
   .modal-content {
     width: 90%;
     max-width: 350px;
@@ -621,7 +770,6 @@ body.dark-mode .close {
     font-size: 0.9rem;
   }
 
-  /* Footer di mobile */
   .footer {
     flex-direction: row;
     justify-content: space-between;
@@ -639,6 +787,32 @@ body.dark-mode .close {
 
   .footer-links a {
     font-size: 1rem;
+  }
+
+  .dark-mode-btn {
+    padding: 6px 10px;
+    font-size: 1rem;
+  }
+
+  .close {
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    padding: 3px 8px;
+  }
+
+  .search-container {
+    max-width: 300px;
+  }
+
+  .search-container input {
+    font-size: 0.9rem;
+    padding: 8px 35px 8px 12px;
+  }
+
+  .search-icon {
+    right: 12px;
+    font-size: 0.9rem;
   }
 }
 
@@ -678,6 +852,15 @@ body.dark-mode .close {
     width: calc(100% - 10px);
   }
 
+  #tab-container {
+    gap: 5px;
+  }
+
+  .tab {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
   h1, h2 {
     font-size: 1.2rem;
   }
@@ -688,6 +871,7 @@ body.dark-mode .close {
 
   .airdrop-item {
     padding: 10px;
+    transition: none;
   }
 
   .modal-content {
@@ -712,8 +896,34 @@ body.dark-mode .close {
   .footer-links a {
     font-size: 0.9rem;
   }
+
+  .dark-mode-btn {
+    padding: 5px 8px;
+    font-size: 0.9rem;
+  }
+
+  .close {
+    top: 8px;
+    right: 12px;
+    font-size: 1.3rem;
+    padding: 2px 6px;
+  }
+
+  .search-container {
+    max-width: 250px;
+  }
+
+  .search-container input {
+    font-size: 0.8rem;
+    padding: 6px 30px 6px 10px;
+  }
+
+  .search-icon {
+    right: 10px;
+    font-size: 0.8rem;
+  }
 }
-/* Styling untuk Global Chat */
+
 .chat-container {
   max-width: 900px;
   width: 100%;
@@ -794,7 +1004,6 @@ body.dark-mode .chat-input-group input {
   min-width: 200px;
 }
 
-/* Responsive styling untuk chat */
 @media (max-width: 768px) {
   .chat-container {
       padding: 15px;

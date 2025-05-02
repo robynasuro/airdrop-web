@@ -16,8 +16,8 @@
             <i class="fas fa-bars"></i>
         </button>
         <div class="navbar-links">
-            <a href="/index">Airdrop List</a>
-            <a href="/chat" class="active">Global Chat</a>
+            <a href="/index.html">Airdrop List</a>
+            <a href="/chat.html" class="active">Global Chat</a>
             <a href="#" onclick="showLoginModal()">Admin Dashboard</a>
             <button id="darkModeToggle" class="dark-mode-btn">
                 <i class="fas fa-moon"></i>
@@ -210,7 +210,7 @@
                 });
                 const data = await res.json();
                 if (res.ok && data.success) {
-                    window.location.href = "/admin"; // Diupdate tanpa .html
+                    window.location.href = "/admin.html"; // Diupdate tanpa .html
                 } else {
                     messageDiv.textContent = data.error || "Login failed";
                     messageDiv.style.color = "red";

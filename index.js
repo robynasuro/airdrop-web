@@ -18,8 +18,9 @@ if (dotenvResult.error) {
 }
 
 const airdropRoutes = require("./server/routes/airdrop");
+console.log('airdropRoutes:', airdropRoutes, 'Type:', typeof airdropRoutes);
 
-const app = express();
+const app = express(); // Pindah ke sini sebelum app.use()
 const port = process.env.PORT || 3000;
 
 const server = http.createServer(app);
@@ -30,7 +31,7 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"],
   },
-  path: "/socket.io", // Pastiin path eksplisit
+  path: "/socket.io",
 });
 
 // Tambah error handling untuk Socket.IO
@@ -50,7 +51,6 @@ io.on("connection", (socket) => {
     console.log("user disconnected:", socket.id);
   });
 
-  // Tambah error handling untuk socket
   socket.on("error", (error) => {
     console.error("Socket error:", error);
   });
@@ -99,7 +99,7 @@ app.get("/socket.io/socket.io.js", (req, res) => {
 // Static middleware
 app.use(express.static("public"));
 
-app.use("/api/airdrop", airdropRoutes);
+app.use("/api/airdrop", airdropRoutes); // Pindah ke sini, setelah app didefinisikan
 
 app.post("/api/logout", (req, res, next) => {
   req.url = "/logout";
