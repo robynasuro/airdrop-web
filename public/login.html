@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - 0xcreamy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">0xcreamy</div>
+    <button class="hamburger" onclick="toggleMenu()">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="navbar-links">
+      <a href="/index.html">Airdrop List</a>
+      <a href="/chat.html">Global Chat</a>
+      <!-- Link Login dihapus di halaman login -->
+      <button id="darkModeToggle" class="dark-mode-btn">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Login to 0xcreamy</h1>
+    <form id="loginForm">
+      <label for="password">Admin Password:</label>
+      <input type="password" id="password" name="password" placeholder="Admin Password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p id="message"></p>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 0xcreamy. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="https://x.com/0xCreamy" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-x-twitter"></i>
+      </a>
+      <a href="https://github.com/robynasuro" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      const messageDiv = document.getElementById('message');
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          localStorage.setItem('token', data.token);
+          messageDiv.textContent = 'Login successful! Redirecting...';
+          messageDiv.style.color = 'green';
+          setTimeout(() => window.location.href = '/admin.html', 1000);
+        } else {
+          messageDiv.textContent = data.error || 'Login failed';
+          messageDiv.style.color = 'red';
+        }
+      } catch (err) {
+        messageDiv.textContent = 'Error during login';
+        messageDiv.style.color = 'red';
+      }
+    });
+
+    // Toggle menu untuk navbar responsif
+    function toggleMenu() {
+      const navbarLinks = document.querySelector(".navbar-links");
+      const hamburgerIcon = document.querySelector(".hamburger i");
+      navbarLinks.classList.toggle("active");
+      if (navbarLinks.classList.contains("active")) {
+        hamburgerIcon.classList.remove("fa-bars");
+        hamburgerIcon.classList.add("fa-times");
+      } else {
+        hamburgerIcon.classList.remove("fa-times");
+        hamburgerIcon.classList.add("fa-bars");
+      }
+    }
+
+    // Event listener untuk nutup menu pas klik link
+    document.addEventListener("DOMContentLoaded", () => {
+      const navbarLinks = document.querySelector(".navbar-links");
+      const links = navbarLinks.querySelectorAll("a");
+
+      links.forEach(link => {
+        link.addEventListener("click", () => {
+          navbarLinks.classList.remove("active");
+          const hamburgerIcon = document.querySelector(".hamburger i");
+          hamburgerIcon.classList.remove("fa-times");
+          hamburgerIcon.classList.add("fa-bars");
+        });
+      });
+
+      // Nutup menu pas klik di luar navbar
+      document.addEventListener("click", (e) => {
+        const hamburger = document.querySelector(".hamburger");
+        if (!navbarLinks.contains(e.target) && !hamburger.contains(e.target) && navbarLinks.classList.contains("active")) {
+          navbarLinks.classList.remove("active");
+          const hamburgerIcon = document.querySelector(".hamburger i");
+          hamburgerIcon.classList.remove("fa-times");
+          hamburgerIcon.classList.add("fa-bars");
+        }
+      });
+    });
+
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    darkModeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      const icon = darkModeToggle.querySelector("i");
+      if (document.body.classList.contains("dark-mode")) {
+        icon.classList.remove("fa-moon");
+        icon.classList.add("fa-sun");
+        localStorage.setItem("theme", "dark");
+      } else {
+        icon.classList.remove("fa-sun");
+        icon.classList.add("fa-moon");
+        localStorage.setItem("theme", "light");
+      }
+    });
+
+    // Load saved theme
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark-mode");
+      darkModeToggle.querySelector("i").classList.remove("fa-moon");
+      darkModeToggle.querySelector("i").classList.add("fa-sun");
+    }
+  </script>
+</body>
+</html>
